@@ -1,17 +1,27 @@
 import Tkinter as tk
+import tkMessageBox
 import os
 import time
 import webbrowser
 import subprocess
 import thread
+import binascii
 
 def offsetsToList():
-    offsetList = []
+    spriteOffsetList = []
+    wavOffsetList = []
+    oggOffsetList = []
     offsets = open('offsets.txt','r')
+    offsetType = 1
     for line in offsets:
-        offsetList.append((int(line[0:8]),int(line[9:17])))
+        if line[0] == '-':
+            offsetType += 1
+        elif offsetType == 1:
+            spriteOffsetList.append((int(line[0:8]),int(line[9:17])))
+        elif offsetType == 2:
+            wavOffsetList.append((int(line[0:8]),int(line[9:17])))
     offsets.close()
-    return offsetList
+    return (spriteOffsetList,wavOffsetList,oggOffsetList)
 
 ########PNG FORMAT###############
 #Hex - 89 50 4E 47
@@ -25,8 +35,11 @@ def offsetsToList():
 
 def newOffsetsToList():
     offsetList = []
+    wavOffsetList = []
+    oggOffsetList = []
     lastEight = []
     currentTuple = [0,0]
+    currentWav = [0,0]
     currentOffset = -1
     currentValue = ' '
     rivals = open('RivalsofAether.exe','rb')
@@ -45,20 +58,29 @@ def newOffsetsToList():
             currentTuple[1] = currentOffset + 1
             print 'End - '+str(currentTuple[1])
             offsetList.append(tuple(currentTuple))
+        if lastEight[len(lastEight)-4:] == [82,73,70,70]:
+            currentWav[0] = currentOffset - 3
+            length = int(binascii.hexlify(rivals.read(4)), 16)+8
+            currentOffset += 4
+            currentWav[1] = currentWav[0]+length
+            wavOffsetList.append(tuple(currentWav))
         
     rivals.close()
     print offsetList
-    return offsetList
+    saveOffsetsFromList(offsetList,wavOffsetList,oggOffsetList)
 
-def saveOffsetsFromList(offsets):
+def saveOffsetsFromList(offsets,wavOffsetList,oggOffsetList):
     offsetFile = open('offsets.txt','w')
     for start,end in offsets:
+        offsetFile.write(str(start)+'-'+str(end)+'\n')
+    offsetFile.write('-\n')
+    for start,end in wavOffsetList:
         offsetFile.write(str(start)+'-'+str(end)+'\n')
     offsetFile.close()
 
 def ripSprite():
-    path = os.path.realpath(__file__)[:len(os.path.realpath(__file__))-23]
-    offsets = offsetsToList()
+    path = os.path.realpath(__file__)[:len(os.path.realpath(__file__))-24]
+    offsets = offsetsToList()[0]
     rivalsEXE = open('RivalsofAether.exe','rb')
     currentRip = 0
     for start,end in offsets:
@@ -69,12 +91,12 @@ def ripSprite():
         f.close()
         
     rivalsEXE.close()
-    tk.tkMessageBox.showinfo( "Finished", "Sprite rip complete.")
+    tkMessageBox.showinfo( "Finished", "Sprite rip complete.")
     print 'ok.'
 
 def replaceSprite():
-    path = os.path.realpath(__file__)[:len(os.path.realpath(__file__))-23]
-    offsets = offsetsToList()
+    path = os.path.realpath(__file__)[:len(os.path.realpath(__file__))-24]
+    offsets = offsetsToList()[0]
     rivalsEXE = open('RivalsofAether.exe','r+b')
     currentRip = 0
     for start,end in offsets:
@@ -84,12 +106,12 @@ def replaceSprite():
         rivalsEXE.write(f.read((start-end)-1))
         f.close()
     rivalsEXE.close()
-    tk.tkMessageBox.showinfo( "Finished", "Sprite replacement complete.")
+    tkMessageBox.showinfo( "Finished", "Sprite replacement complete.")
     print 'ok.'
 
 def update():
-    saveOffsetsFromList(newOffsetsToList())
-    tk.tkMessageBox.showinfo( "Finished", "Sprite offset update complete.")
+    newOffsetsToList()
+    tkMessageBox.showinfo( "Finished", "Sprite offset update complete.")
     print 'ok.'
 
 def tutorial():
@@ -101,14 +123,48 @@ def about():
 def run():
     thread.start_new_thread(subprocess.call,("RivalsofAether.exe",))
 
+def ripWav():
+    path = os.path.realpath(__file__)[:len(os.path.realpath(__file__))-24]
+    offsets = offsetsToList()[1]
+    rivalsEXE = open('RivalsofAether.exe','rb')
+    currentRip = 0
+    for start,end in offsets:
+        currentRip += 1
+        f = open(path+'audio\\RIP_'+str(currentRip)+'.wav','wb')
+        rivalsEXE.seek(start)
+        f.write(rivalsEXE.read((start-end)-1))
+        f.close()
+        
+    rivalsEXE.close()
+    tkMessageBox.showinfo( "Finished", "Audio rip complete.")
+    print 'ok.'
+
+def replaceWav():
+    path = os.path.realpath(__file__)[:len(os.path.realpath(__file__))-24]
+    offsets = offsetsToList()[1]
+    rivalsEXE = open('RivalsofAether.exe','r+b')
+    currentRip = 0
+    for start,end in offsets:
+        currentRip += 1
+        f = open(path+'audio\\RIP_'+str(currentRip)+'.wav','rb')
+        rivalsEXE.seek(start)
+        rivalsEXE.write(f.read((start-end)-1))
+        f.close()
+    rivalsEXE.close()
+    tkMessageBox.showinfo( "Finished", "Audio replacement complete.")
+    print 'ok.'
+
+
 #Main Stuff
 top = tk.Tk()
 menubar = tk.Menu(top)
 
 filemenu = tk.Menu(menubar,tearoff=0)
-filemenu.add_command(label="Rip sprites",command=ripSprite)
-filemenu.add_command(label="Replace sprites",command=replaceSprite)
-filemenu.add_command(label="Update sprite offsets",command=update)
+filemenu.add_command(label="Rip Sprites",command=ripSprite)
+filemenu.add_command(label="Rip Audio",command=ripWav)
+filemenu.add_command(label="Replace Sprites",command=replaceSprite)
+filemenu.add_command(label="Replace Audio",command=replaceWav)
+filemenu.add_command(label="Update Offsets",command=update)
 filemenu.add_separator()
 filemenu.add_command(label="Exit",command=top.quit)
 menubar.add_cascade(label="File", menu=filemenu)

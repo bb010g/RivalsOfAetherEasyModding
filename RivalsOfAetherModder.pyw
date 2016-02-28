@@ -6,6 +6,21 @@ import webbrowser
 import subprocess
 import thread
 import binascii
+import tkFileDialog
+import glob
+import shutil
+import ttk
+
+def getAppData():
+    roamingPath = os.getenv('APPDATA')
+    thereYet = False
+    lengthBack = 0
+    for i in range(0,len(roamingPath)):
+        if not thereYet and roamingPath[len(roamingPath)-(i+1)] == '\\':
+            thereYet = True
+            lengthBack = len(roamingPath)-(i+1)
+
+    return roamingPath[:lengthBack]
 
 def offsetsToList():
     spriteOffsetList = []
@@ -95,19 +110,22 @@ def ripSprite():
     print 'ok.'
 
 def replaceSprite():
-    path = os.path.realpath(__file__)[:len(os.path.realpath(__file__))-24]
-    offsets = offsetsToList()[0]
-    rivalsEXE = open('RivalsofAether.exe','r+b')
-    currentRip = 0
-    for start,end in offsets:
-        currentRip += 1
-        f = open(path+'sprites\\RIP_'+str(currentRip)+'.png','rb')
-        rivalsEXE.seek(start)
-        rivalsEXE.write(f.read((start-end)-1))
-        f.close()
-    rivalsEXE.close()
-    tkMessageBox.showinfo( "Finished", "Sprite replacement complete.")
-    print 'ok.'
+    try:
+        path = os.path.realpath(__file__)[:len(os.path.realpath(__file__))-24]
+        offsets = offsetsToList()[0]
+        rivalsEXE = open('RivalsofAether.exe','r+b')
+        currentRip = 0
+        for start,end in offsets:
+            currentRip += 1
+            f = open(path+'sprites\\RIP_'+str(currentRip)+'.png','rb')
+            rivalsEXE.seek(start)
+            rivalsEXE.write(f.read((start-end)-1))
+            f.close()
+        rivalsEXE.close()
+        tkMessageBox.showinfo( "Finished", "Sprite replacement complete.")
+        print 'ok.'
+    except:
+        pass
 
 def update():
     newOffsetsToList()
@@ -140,20 +158,58 @@ def ripWav():
     print 'ok.'
 
 def replaceWav():
-    path = os.path.realpath(__file__)[:len(os.path.realpath(__file__))-24]
-    offsets = offsetsToList()[1]
-    rivalsEXE = open('RivalsofAether.exe','r+b')
-    currentRip = 0
-    for start,end in offsets:
-        currentRip += 1
-        f = open(path+'audio\\RIP_'+str(currentRip)+'.wav','rb')
-        rivalsEXE.seek(start)
-        rivalsEXE.write(f.read((start-end)-1))
-        f.close()
-    rivalsEXE.close()
-    tkMessageBox.showinfo( "Finished", "Audio replacement complete.")
-    print 'ok.'
+    try:
+        path = os.path.realpath(__file__)[:len(os.path.realpath(__file__))-24]
+        offsets = offsetsToList()[1]
+        rivalsEXE = open('RivalsofAether.exe','r+b')
+        currentRip = 0
+        for start,end in offsets:
+            currentRip += 1
+            f = open(path+'audio\\RIP_'+str(currentRip)+'.wav','rb')
+            rivalsEXE.seek(start)
+            rivalsEXE.write(f.read((start-end)-1))
+            f.close()
+        rivalsEXE.close()
+        tkMessageBox.showinfo( "Finished", "Audio replacement complete.")
+        print 'ok.'
+    except:
+        pass #that you are a failure
 
+def install():
+    if tkMessageBox.askyesno("Install","Are you sure you want to install? Doing so will overwrite your current mod and modify your exe."):
+        try:
+            progressWindow = tk.Tk()
+            text = tk.Label(progressWindow,text="Installing Mod...")
+            text.pack()
+            progress = ttk.Progressbar(progressWindow, orient="horizontal",length=200, mode="determinate")
+            progress.pack()
+            progressThread = thread.start_new_thread(progressWindow.mainloop,())
+            progress["maximum"] = 1.0
+            progress["value"] = 0.0
+            
+            fileDirectory = tkFileDialog.askdirectory()
+            path = os.path.realpath(__file__)[:len(os.path.realpath(__file__))-24]
+            total = len(glob.glob(fileDirectory+"/sprites/RIP_*.png")) + len(glob.glob(fileDirectory+"/audio/RIP_*.wav")) + 5
+            for f in glob.glob(fileDirectory+"/sprites/RIP_*.png"):
+                for g in range(0,len(f)):
+                    if f[g:g+7]=='sprites':
+                        shutil.copyfile(f,path+f[g-1:])
+                        progress["value"] += 1.0 / total
+            for f in glob.glob(fileDirectory+"/audio/RIP_*.wav"):
+                for g in range(0,len(f)):
+                    if f[g:g+5]=='audio':
+                        shutil.copyfile(f,path+f[g-1:])
+                        progress["value"] += 1.0 / total
+            if fileDirectory != '':
+                replaceSprite()
+                progress["value"] += 5.0 / total
+                replaceWav()
+                progress["value"] = 1
+                tkMessageBox.showinfo("Install","Successfully installed.")
+                progressWindow.destroy()
+    
+        except:
+            tkMessageBox.showerror("Install","Failed to install.")
 
 #Main Stuff
 top = tk.Tk()
@@ -171,6 +227,7 @@ menubar.add_cascade(label="File", menu=filemenu)
 
 rivalsmenu = tk.Menu(menubar,tearoff=0)
 rivalsmenu.add_command(label="Run RivalsofAether.exe",command=run)
+rivalsmenu.add_command(label="Install Mod",command=install)
 menubar.add_cascade(label="Game",menu=rivalsmenu)
 
 helpmenu = tk.Menu(menubar,tearoff=0)

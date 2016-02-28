@@ -117,10 +117,11 @@ def replaceSprite():
         currentRip = 0
         for start,end in offsets:
             currentRip += 1
-            f = open(path+'sprites\\RIP_'+str(currentRip)+'.png','rb')
-            rivalsEXE.seek(start)
-            rivalsEXE.write(f.read((start-end)-1))
-            f.close()
+            if os.path.isfile(path+'sprites\\RIP_'+str(currentRip)+'.png'):
+                f = open(path+'sprites\\RIP_'+str(currentRip)+'.png','rb')
+                rivalsEXE.seek(start)
+                rivalsEXE.write(f.read((start-end)-1))
+                f.close()
         rivalsEXE.close()
         tkMessageBox.showinfo( "Finished", "Sprite replacement complete.")
         print 'ok.'
@@ -165,10 +166,11 @@ def replaceWav():
         currentRip = 0
         for start,end in offsets:
             currentRip += 1
-            f = open(path+'audio\\RIP_'+str(currentRip)+'.wav','rb')
-            rivalsEXE.seek(start)
-            rivalsEXE.write(f.read((start-end)-1))
-            f.close()
+            if os.path.isfile(path+'audio\\RIP_'+str(currentRip)+'.wav'):
+                f = open(path+'audio\\RIP_'+str(currentRip)+'.wav','rb')
+                rivalsEXE.seek(start)
+                rivalsEXE.write(f.read((start-end)-1))
+                f.close()
         rivalsEXE.close()
         tkMessageBox.showinfo( "Finished", "Audio replacement complete.")
         print 'ok.'
@@ -186,7 +188,7 @@ def install():
             progressThread = thread.start_new_thread(progressWindow.mainloop,())
             progress["maximum"] = 1.0
             progress["value"] = 0.0
-            
+            appDataPath = getAppData()
             fileDirectory = tkFileDialog.askdirectory()
             path = os.path.realpath(__file__)[:len(os.path.realpath(__file__))-24]
             total = len(glob.glob(fileDirectory+"/sprites/RIP_*.png")) + len(glob.glob(fileDirectory+"/audio/RIP_*.wav")) + 5
@@ -195,11 +197,18 @@ def install():
                     if f[g:g+7]=='sprites':
                         shutil.copyfile(f,path+f[g-1:])
                         progress["value"] += 1.0 / total
+                        
             for f in glob.glob(fileDirectory+"/audio/RIP_*.wav"):
                 for g in range(0,len(f)):
                     if f[g:g+5]=='audio':
                         shutil.copyfile(f,path+f[g-1:])
                         progress["value"] += 1.0 / total
+                        
+            for f in glob.glob(fileDirectory+"/dev_mode/custom_*.ini"):
+                for g in range(0,len(f)):
+                    if f[g:g+8]=='dev_mode':
+                        shutil.copyfile(f,appDataPath+"/Local/RivalsofAether"+f[g-1:])
+
             if fileDirectory != '':
                 replaceSprite()
                 progress["value"] += 5.0 / total
@@ -211,7 +220,25 @@ def install():
         except:
             tkMessageBox.showerror("Install","Failed to install.")
 
+def backup():
+    try:
+        path = os.path.realpath(__file__)[:len(os.path.realpath(__file__))-24]
+        shutil.copyfile(path+"RivalsofAether.exe",path+"RivalsofAetherBackup.exe")
+        if not os.path.exists(path+"/backup/"):
+            os.makedirs(path+"/backup/")
+        shutil.copytree(path+"/sprites/",path+"/backup/sprites/")
+        shutil.copytree(path+"/audio/",path+"backup/audio/")
+        tkMessageBox.showinfo("Backup","Successfully backed up files.")
+    except:
+        tkMessageBox.showerror("Backup","Failed to backup files.")
+
 #Main Stuff
+path = os.path.realpath(__file__)[:len(os.path.realpath(__file__))-24]
+if not os.path.exists(path+"/sprites/"):
+    os.makedirs(path+"/sprites/")
+if not os.path.exists(path+"/audio/"):
+    os.makedirs(path+"/audio/")
+
 top = tk.Tk()
 menubar = tk.Menu(top)
 
@@ -227,7 +254,8 @@ menubar.add_cascade(label="File", menu=filemenu)
 
 rivalsmenu = tk.Menu(menubar,tearoff=0)
 rivalsmenu.add_command(label="Run RivalsofAether.exe",command=run)
-rivalsmenu.add_command(label="Install Mod",command=install)
+rivalsmenu.add_command(label="Install Mod or Refresh from Backup",command=install)
+rivalsmenu.add_command(label="Backup Files",command=backup)
 menubar.add_cascade(label="Game",menu=rivalsmenu)
 
 helpmenu = tk.Menu(menubar,tearoff=0)

@@ -24,3 +24,9 @@ How to revert your changes:
 - Replace again!
 
 Also worth noting that if your sprites are modded it will extract the modded sprites when you rip from the exe.
+
+## Formatting for mod compatible with mod easy installer (For version 1.2 and up)
+- Root, this is you actual mod folder and what they select when they want to install the mod. Name it whatever you want.
+    - sprites, put all modded sprites (to reduce file size only include the ones you changed)
+    - audio, put all modded audio in here (to reduce file size only include the ones you changed)
+That is it! if you set it up like that they just have to select the root folder (whatever you called it) under the Game > Install Mod option to install.

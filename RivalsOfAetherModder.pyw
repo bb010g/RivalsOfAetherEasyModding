@@ -134,7 +134,7 @@ def update():
     print 'ok.'
 
 def tutorial():
-    pass #this is a filler, will open to youtube tutorial
+    webbrowser.open('youtu.be/Bg2Z2NyUp7c')
 
 def about():
     webbrowser.open('https://github.com/jam1-garner/RivalsOfAetherEasyModding')

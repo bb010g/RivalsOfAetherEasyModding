@@ -19,20 +19,15 @@ void getOffsets(vector <int> &starts,vector <int> &ends,vector <int> &starta,vec
         if(temp=="")
             break;
         starts.push_back(atoi(temp.c_str()));
-        //printf("\n%s",temp.c_str());
         getline(f,temp);
-        //printf("-%s",temp.substr(1,temp.length()).c_str());
         ends.push_back(atoi(temp.c_str()));
     }
-    printf("\n-");
     for(int i=0;f;i++){
         getline(f,temp,'-');
         if(temp=="")
             break;
         starta.push_back(atoi(temp.c_str()));
-        //printf("\n%i",atoi(temp.c_str()));
         getline(f,temp);
-        //printf("-%i",atoi(temp.substr(1,temp.length()).c_str()));
         enda.push_back(atoi(temp.c_str()));
     }
     f.close();
@@ -201,14 +196,14 @@ int main(int argc, char* argv[]){
         command = argv[1];//Set the first argument as the command
 
     if(argc==1){//If no arguments are provided print the commands
-        printf("\n   Commands   ");
-        printf("\n--------------");
-        printf("\n-rip [exe path] [folder path] (note: input neither will assume everything is in this folder, standard names.)");
-        printf("\n-replace [folder path] [exe path]");
-        printf("\n-ripWav [exe path] [folder path]");
-        printf("\n-replaceWav [folder path] [exe path]");
-        printf("\n-update");
-        printf("\n-help [command]");
+        //printf("\n   Commands   ");
+        //printf("\n--------------");
+        //printf("\n-rip [exe path] [folder path] (note: input neither will assume everything is in this folder, standard names.)");
+        //printf("\n-replace [folder path] [exe path]");
+        //printf("\n-ripWav [exe path] [folder path]");
+        //printf("\n-replaceWav [folder path] [exe path]");
+        //printf("\n-update");
+        //printf("\n-help [command]");
     }
     if(argc==3&&command=="-help"){//If help is needed give it
 

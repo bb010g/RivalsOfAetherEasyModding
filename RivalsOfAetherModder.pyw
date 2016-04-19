@@ -95,39 +95,18 @@ def saveOffsetsFromList(offsets,wavOffsetList,oggOffsetList):
     offsetFile.close()
 
 def ripSprite():
-    path = os.path.realpath(__file__)[:len(os.path.realpath(__file__))-24]
-    offsets = offsetsToList()[0]
-    rivalsEXE = open('RivalsofAether.exe','rb')
-    currentRip = 0
-    for start,end in offsets:
-        currentRip += 1
-        f = open(path+'sprites\\RIP_'+str(currentRip)+'.png','wb')
-        rivalsEXE.seek(start)
-        f.write(rivalsEXE.read((start-end)-1))
-        f.close()
-        
-    rivalsEXE.close()
-    tkMessageBox.showinfo( "Finished", "Sprite rip complete.")
-    print 'ok.'
+    try:
+        subprocess.check_call(["RivalsEasyModdingC_RIP.exe"])
+        tkMessageBox.showinfo( "Finished", "Sprite rip complete.")
+    except:
+        tkMessageBox.showinfo( "Finished", "Error occurred.")
 
 def replaceSprite():
     try:
-        path = os.path.realpath(__file__)[:len(os.path.realpath(__file__))-24]
-        offsets = offsetsToList()[0]
-        rivalsEXE = open('RivalsofAether.exe','r+b')
-        currentRip = 0
-        for start,end in offsets:
-            currentRip += 1
-            if os.path.isfile(path+'sprites\\RIP_'+str(currentRip)+'.png'):
-                f = open(path+'sprites\\RIP_'+str(currentRip)+'.png','rb')
-                rivalsEXE.seek(start)
-                rivalsEXE.write(f.read((start-end)-1))
-                f.close()
-        rivalsEXE.close()
+        subprocess.check_call(["RivalsEasyModdingC_REPLACE.exe"])
         tkMessageBox.showinfo( "Finished", "Sprite replacement complete.")
-        print 'ok.'
     except:
-        pass
+        tkMessageBox.showinfo( "Finished", "Error occurred.")
 
 def update():
     newOffsetsToList()

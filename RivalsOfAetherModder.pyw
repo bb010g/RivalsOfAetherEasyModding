@@ -123,39 +123,18 @@ def run():
     thread.start_new_thread(subprocess.call,("RivalsofAether.exe",))
 
 def ripWav():
-    path = os.path.realpath(__file__)[:len(os.path.realpath(__file__))-24]
-    offsets = offsetsToList()[1]
-    rivalsEXE = open('RivalsofAether.exe','rb')
-    currentRip = 0
-    for start,end in offsets:
-        currentRip += 1
-        f = open(path+'audio\\RIP_'+str(currentRip)+'.wav','wb')
-        rivalsEXE.seek(start)
-        f.write(rivalsEXE.read((start-end)-1))
-        f.close()
-        
-    rivalsEXE.close()
-    tkMessageBox.showinfo( "Finished", "Audio rip complete.")
-    print 'ok.'
+    try:
+        subprocess.check_call(["RivalsEasyModdingC.exe","ripWav"])
+        tkMessageBox.showinfo( "Finished", "Audio rip complete.")
+    except:
+        tkMessageBox.showinfo( "Finished", "Error occurred.")
 
 def replaceWav():
     try:
-        path = os.path.realpath(__file__)[:len(os.path.realpath(__file__))-24]
-        offsets = offsetsToList()[1]
-        rivalsEXE = open('RivalsofAether.exe','r+b')
-        currentRip = 0
-        for start,end in offsets:
-            currentRip += 1
-            if os.path.isfile(path+'audio\\RIP_'+str(currentRip)+'.wav'):
-                f = open(path+'audio\\RIP_'+str(currentRip)+'.wav','rb')
-                rivalsEXE.seek(start)
-                rivalsEXE.write(f.read((start-end)-1))
-                f.close()
-        rivalsEXE.close()
+        subprocess.check_call(["RivalsEasyModdingC.exe","replaceWav"])
         tkMessageBox.showinfo( "Finished", "Audio replacement complete.")
-        print 'ok.'
     except:
-        pass #that you are a failure
+        tkMessageBox.showinfo( "Finished", "Error occurred.")
 
 def install():
     if tkMessageBox.askyesno("Install","Are you sure you want to install? Doing so will overwrite your current mod and modify your exe."):
@@ -224,8 +203,9 @@ menubar = tk.Menu(top)
 
 filemenu = tk.Menu(menubar,tearoff=0)
 filemenu.add_command(label="Rip Sprites",command=ripSprite)
-filemenu.add_command(label="Rip Audio",command=ripWav)
 filemenu.add_command(label="Replace Sprites",command=replaceSprite)
+filemenu.add_separator()
+filemenu.add_command(label="Rip Audio",command=ripWav)
 filemenu.add_command(label="Replace Audio",command=replaceWav)
 filemenu.add_command(label="Update Offsets",command=update)
 filemenu.add_separator()

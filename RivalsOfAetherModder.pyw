@@ -23,22 +23,6 @@ def getAppData():
 
     return roamingPath[:lengthBack]
 
-def offsetsToList():
-    spriteOffsetList = []
-    wavOffsetList = []
-    oggOffsetList = []
-    offsets = open('offsets.txt','r')
-    offsetType = 1
-    for line in offsets:
-        if line[0] == '-':
-            offsetType += 1
-        elif offsetType == 1:
-            spriteOffsetList.append((int(line[0:8]),int(line[9:17])))
-        elif offsetType == 2:
-            wavOffsetList.append((int(line[0:8]),int(line[9:17])))
-    offsets.close()
-    return (spriteOffsetList,wavOffsetList,oggOffsetList)
-
 ########PNG FORMAT###############
 #Hex - 89 50 4E 47
 #Dec - 137 80 78 71
@@ -48,51 +32,6 @@ def offsetsToList():
 #Hex - 49 45 4E 44 AE 42 60 82
 #Dec - 73 69 78 68 174 66 96 130
 #################################
-
-def newOffsetsToList():
-    offsetList = []
-    wavOffsetList = []
-    oggOffsetList = []
-    lastEight = []
-    currentTuple = [0,0]
-    currentWav = [0,0]
-    currentOffset = -1
-    currentValue = ' '
-    rivals = open('RivalsofAether.exe','rb')
-    while currentValue != '':
-        currentOffset += 1
-        currentValue = rivals.read(1)
-        if currentValue != '':
-            lastEight.append(ord(currentValue))
-        #print 'Offset - '+str(currentOffset)+' | Last Eight - '+str(lastEight)
-        if len(lastEight) > 8:
-            del lastEight[0]
-        if lastEight[len(lastEight)-4:] == [137,80,78,71]:
-            currentTuple[0] = currentOffset - 3
-            print 'Start - '+str(currentTuple[0])
-        if lastEight == [73,69,78,68,174,66,96,130]:
-            currentTuple[1] = currentOffset + 1
-            print 'End - '+str(currentTuple[1])
-            offsetList.append(tuple(currentTuple))
-        if lastEight[len(lastEight)-4:] == [82,73,70,70]:
-            currentWav[0] = currentOffset - 3
-            length = int(binascii.hexlify(rivals.read(4)), 16)+8
-            currentOffset += 4
-            currentWav[1] = currentWav[0]+length
-            wavOffsetList.append(tuple(currentWav))
-        
-    rivals.close()
-    print offsetList
-    saveOffsetsFromList(offsetList,wavOffsetList,oggOffsetList)
-
-def saveOffsetsFromList(offsets,wavOffsetList,oggOffsetList):
-    offsetFile = open('offsets.txt','w')
-    for start,end in offsets:
-        offsetFile.write(str(start)+'-'+str(end)+'\n')
-    offsetFile.write('-\n')
-    for start,end in wavOffsetList:
-        offsetFile.write(str(start)+'-'+str(end)+'\n')
-    offsetFile.close()
 
 def ripSprite():
     try:
@@ -109,9 +48,11 @@ def replaceSprite():
         tkMessageBox.showinfo( "Finished", "Error occurred.")
 
 def update():
-    newOffsetsToList()
-    tkMessageBox.showinfo( "Finished", "Sprite offset update complete.")
-    print 'ok.'
+    try:
+        subprocess.check_call(["RivalsEasyModdingC.exe","update"])
+        tkMessageBox.showinfo( "Finished", "Offset update complete.")
+    except:
+        tkMessageBox.showinfo( "Finished", "Error occurred.")
 
 def tutorial():
     webbrowser.open('youtu.be/Bg2Z2NyUp7c')

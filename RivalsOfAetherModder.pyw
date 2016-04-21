@@ -78,47 +78,22 @@ def replaceWav():
         tkMessageBox.showinfo( "Finished", "Error occurred.")
 
 def install():
-    if tkMessageBox.askyesno("Install","Are you sure you want to install? Doing so will overwrite your current mod and modify your exe."):
-        try:
-            progressWindow = tk.Tk()
-            text = tk.Label(progressWindow,text="Installing Mod...")
-            text.pack()
-            progress = ttk.Progressbar(progressWindow, orient="horizontal",length=200, mode="determinate")
-            progress.pack()
-            progressThread = thread.start_new_thread(progressWindow.mainloop,())
-            progress["maximum"] = 1.0
-            progress["value"] = 0.0
-            appDataPath = getAppData()
-            fileDirectory = tkFileDialog.askdirectory()
-            path = os.path.realpath(__file__)[:len(os.path.realpath(__file__))-24]
-            total = len(glob.glob(fileDirectory+"/sprites/RIP_*.png")) + len(glob.glob(fileDirectory+"/audio/RIP_*.wav")) + 5
-            for f in glob.glob(fileDirectory+"/sprites/RIP_*.png"):
-                for g in range(0,len(f)):
-                    if f[g:g+7]=='sprites':
-                        shutil.copyfile(f,path+f[g-1:])
-                        progress["value"] += 1.0 / total
-                        
-            for f in glob.glob(fileDirectory+"/audio/RIP_*.wav"):
-                for g in range(0,len(f)):
-                    if f[g:g+5]=='audio':
-                        shutil.copyfile(f,path+f[g-1:])
-                        progress["value"] += 1.0 / total
-                        
-            for f in glob.glob(fileDirectory+"/dev_mode/custom_*.ini"):
-                for g in range(0,len(f)):
-                    if f[g:g+8]=='dev_mode':
-                        shutil.copyfile(f,appDataPath+"/Local/RivalsofAether"+f[g-1:])
+    try:
+        appDataPath = getAppData()
+        fileDirectory = tkFileDialog.askdirectory()
+        path = os.path.realpath(__file__)[:len(os.path.realpath(__file__))-24]
 
-            if fileDirectory != '':
-                replaceSprite()
-                progress["value"] += 5.0 / total
-                replaceWav()
-                progress["value"] = 1
-                tkMessageBox.showinfo("Install","Successfully installed.")
-                progressWindow.destroy()
-    
-        except:
-            tkMessageBox.showerror("Install","Failed to install.")
+        subprocess.check_call(["RivalsEasyModdingC.exe","replace","RivalsofAether.exe",fileDirectory+'/sprites/'])
+        subprocess.check_call(["RivalsEasyModdingC.exe","replaceWav","RivalsofAether.exe",fileDirectory+'/audio/'])
+                    
+        for f in glob.glob(fileDirectory+"/dev_mode/custom_*.ini"):
+            for g in range(0,len(f)):
+                if f[g:g+8]=='dev_mode':
+                    shutil.copyfile(f,appDataPath+"/Local/RivalsofAether"+f[g-1:])
+        tkMessageBox.showinfo("Success","Mod installed.")
+
+    except:
+        tkMessageBox.showerror("Install","Failed to install.")
 
 def backup():
     try:

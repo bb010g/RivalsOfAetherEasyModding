@@ -15,6 +15,7 @@ void getOffsets(vector <int> &starts,vector <int> &ends,vector <int> &starta,vec
     vector <string> lines;
     string temp;
     ifstream f("offsets.txt");
+    
     for(int i=0;f;i++){
         getline(f,temp,'-');
         if(temp=="")

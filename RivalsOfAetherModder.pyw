@@ -108,13 +108,16 @@ def backup():
         tkMessageBox.showerror("Backup","Failed to backup files.")
 
 #Main Stuff
-e = open("RivalsofAether.exe","r+b")
-x = e.read().find("In Development")
-if x != -1:
-    e.seek(x)
-    e.write("Modded version")
-    print 'Patched title'
-e.close()
+try:
+    e = open("RivalsofAether.exe","r+b")
+    x = e.read().find("In Development")
+    if x != -1:
+        e.seek(x)
+        e.write("Modded version")
+        print 'Patched title'
+    e.close()
+except:
+    print 'Failed to patch title'
         
 path = os.path.realpath(__file__)[:len(os.path.realpath(__file__))-24]
 if not os.path.exists(path+"/sprites/"):

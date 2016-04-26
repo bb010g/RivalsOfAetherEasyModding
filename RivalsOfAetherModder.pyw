@@ -61,6 +61,9 @@ def about():
     webbrowser.open('https://github.com/jam1-garner/RivalsOfAetherEasyModding')
 
 def run():
+    thread.start_new_thread(subprocess.call,("RivalsEasyModdingC.exe",))
+
+def runMod():
     thread.start_new_thread(subprocess.call,("RivalsofAether.exe",))
 
 def ripWav():
@@ -108,16 +111,13 @@ def backup():
         tkMessageBox.showerror("Backup","Failed to backup files.")
 
 #Main Stuff
-try:
-    e = open("RivalsofAether.exe","r+b")
-    x = e.read().find("In Development")
-    if x != -1:
-        e.seek(x)
-        e.write("Modded version")
-        print 'Patched title'
-    e.close()
-except:
-    print 'Failed to patch title'
+e = open("RivalsofAether.exe","r+b")
+x = e.read().find("In Development")
+if x != -1:
+    e.seek(x)
+    e.write("Modded version")
+    print 'Patched title'
+e.close()
         
 path = os.path.realpath(__file__)[:len(os.path.realpath(__file__))-24]
 if not os.path.exists(path+"/sprites/"):
@@ -140,7 +140,8 @@ filemenu.add_command(label="Exit",command=top.quit)
 menubar.add_cascade(label="File", menu=filemenu)
 
 rivalsmenu = tk.Menu(menubar,tearoff=0)
-rivalsmenu.add_command(label="Run RivalsofAether.exe",command=run)
+rivalsmenu.add_command(label="Run Rivals Without Temporary Patches",command=run)
+rivalsmenu.add_command(label="Run Rivals With Temporary Patches",command=runMod)
 rivalsmenu.add_command(label="Install Mod or Refresh from Backup",command=install)
 rivalsmenu.add_command(label="Backup Files",command=backup)
 menubar.add_cascade(label="Game",menu=rivalsmenu)

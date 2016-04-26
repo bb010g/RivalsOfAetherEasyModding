@@ -1,3 +1,4 @@
+#define _WIN32_WINNT 0x0500
 #include <stdio.h>
 #include <fstream>
 #include <stdlib.h>
@@ -15,7 +16,6 @@ void getOffsets(vector <int> &starts,vector <int> &ends,vector <int> &starta,vec
     vector <string> lines;
     string temp;
     ifstream f("offsets.txt");
-    
     for(int i=0;f;i++){
         getline(f,temp,'-');
         if(temp=="")
@@ -243,9 +243,27 @@ int main(int argc, char* argv[]){
     if(command=="update")
         update(exePath,offsetsPath);
 
-    if(argc==1){
-        printf("Run this through the included *.pyw file or using one of the following commands as an argument:\nrip\nreplace\nripWav\nreplaceWav\nupdate\n\n");
-        system("PAUSE");
+    if(argc==1||(argc==2&&command=="-audio")){
+        CreateDirectory("original resources\\",NULL);
+        printf("\nBacking up current sprites...");
+        ripSprites("RivalsofAether.exe","original resources\\");
+        printf("\nReplacing new sprites...");
+        replaceSprites("RivalsofAether.exe","sprites\\");
+        if(command=="-audio"){
+            printf("\nBacking up current audio...");
+            ripAudio("RivalsofAether.exe","original resources\\");
+            printf("\nReplacing new audio...");
+            replaceAudio("RivalsofAether.exe","audio\\");
+        }
+        ShowWindow( GetConsoleWindow(), SW_HIDE );
+        system("RivalsofAether.exe");
+        ShowWindow( GetConsoleWindow(), SW_RESTORE );
+        printf("\Putting back original sprites...");
+        replaceSprites("RivalsofAether.exe","original resources\\");
+        if(command=="-audio"){
+            printf("\Putting back original audio...");
+            replaceAudio("RivalsofAether.exe","original resources\\");
+        }
     }
 
     return 0;

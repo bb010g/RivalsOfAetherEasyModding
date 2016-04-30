@@ -9,6 +9,7 @@
 #include <math.h>
 #include <sstream>
 #include <windows.h>
+#include <time.h>
 
 using namespace std;
 
@@ -243,13 +244,25 @@ int main(int argc, char* argv[]){
     if(command=="update")
         update(exePath,offsetsPath);
 
-    if(argc==1||(argc==2&&command=="-audio")){
+    if(argc==1||(argc==2&&command=="-audio")||(argc==2&&command=="-time")||(argc==2&&command=="-aTime")){
+        string sptFolder = "sprites\\";
+        if(command=="-time"||command=="-aTime"){
+            time_t rawtime;
+            struct tm * timeinfo;
+            time (&rawtime);
+            timeinfo = localtime (&rawtime);
+            printf("\nHour - %i\n",timeinfo->tm_hour);
+            if(timeinfo->tm_hour<=7||timeinfo->tm_hour>=20)
+                sptFolder += "night\\";
+            else
+                sptFolder += "day\\";
+        }
         CreateDirectory("original resources\\",NULL);
         printf("\nBacking up current sprites...");
         ripSprites("RivalsofAether.exe","original resources\\");
         printf("\nReplacing new sprites...");
-        replaceSprites("RivalsofAether.exe","sprites\\");
-        if(command=="-audio"){
+        replaceSprites("RivalsofAether.exe",sptFolder);
+        if(command=="-audio"||command=="-aTime"){
             printf("\nBacking up current audio...");
             ripAudio("RivalsofAether.exe","original resources\\");
             printf("\nReplacing new audio...");
@@ -258,10 +271,10 @@ int main(int argc, char* argv[]){
         ShowWindow( GetConsoleWindow(), SW_HIDE );
         system("RivalsofAether.exe");
         ShowWindow( GetConsoleWindow(), SW_RESTORE );
-        printf("\Putting back original sprites...");
+        printf("\nPutting back original sprites...");
         replaceSprites("RivalsofAether.exe","original resources\\");
-        if(command=="-audio"){
-            printf("\Putting back original audio...");
+        if(command=="-audio"||command=="-aTime"){
+            printf("\nPutting back original audio...");
             replaceAudio("RivalsofAether.exe","original resources\\");
         }
     }

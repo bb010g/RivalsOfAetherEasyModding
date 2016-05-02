@@ -232,6 +232,14 @@ int main(int argc, char* argv[]){
         audioFolder = argv[3];
         offsetsPath = argv[3];
     }
+    ifstream installedCorrectly(exePath.c_str());
+    if(!installedCorrectly){
+        printf("\n\n---------------------------\nError %s was not found!\n---------------------------\n",exePath.c_str());
+        system("PAUSE");
+        installedCorrectly.close();
+        return 0;
+    }
+    installedCorrectly.close();
 
     if(command=="rip")
         ripSprites(exePath,spritesFolder);

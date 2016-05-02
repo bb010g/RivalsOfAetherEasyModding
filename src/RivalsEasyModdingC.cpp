@@ -37,17 +37,6 @@ void getOffsets(vector <int> &starts,vector <int> &ends,vector <int> &starta,vec
     f.close();
 }
 
-bool compareLastX(vector <char> a, int x, int c[]){
-    bool temp = true;
-    for(int i=x;i>0;i--){
-        if(int(a[a.size()-i])!=c[x-i]){
-            temp = false;
-        }
-    }
-
-    return temp;
-}
-
 bool saveOffsetsFromList(vector <int> spriteOffs,vector <int> spriteOffe,vector <int> wavOffs,vector <int> wavOffe,string offsets){
     ofstream offsetsTxt(offsets.c_str());
     for(int i=0;i<spriteOffs.size();i++)
@@ -131,6 +120,7 @@ bool update(string exe, string offsets){
 
     return true;
 }
+
 bool ripSprites(string exe,string folder){
     vector <int> s1,e1,s2,e2;
     char buffer[3];
@@ -252,7 +242,7 @@ int main(int argc, char* argv[]){
     if(command=="update")
         update(exePath,offsetsPath);
 
-    if(argc==1||(argc==2&&command=="-audio")||(argc==2&&command=="-time")||(argc==2&&command=="-aTime")){
+    if(argc==1||(argc==2&&command=="-audio")||(argc==2&&command=="-time")||(argc==2&&command=="-aTime")||(argc==2&&command=="-time2")||(argc==2&&command=="-aTime2")){
         string sptFolder = "sprites\\";
         if(command=="-time"||command=="-aTime"){
             time_t rawtime;
@@ -264,6 +254,23 @@ int main(int argc, char* argv[]){
                 sptFolder += "night\\";
             else
                 sptFolder += "day\\";
+        }
+        if(command=="-time2"||command=="-aTime2"){
+            printf("Hello");
+            time_t rawtime;
+            struct tm * timeinfo;
+            time (&rawtime);
+            timeinfo = localtime (&rawtime);
+            printf("\nHour - %i\n",timeinfo->tm_hour);
+            if(timeinfo->tm_hour>=6&&timeinfo->tm_hour<11)
+                sptFolder += "sunrise\\";
+            else if(timeinfo->tm_hour>=11&&(timeinfo->tm_hour<17||(timeinfo->tm_min==17&&timeinfo->tm_min<30)))
+                sptFolder += "day\\";
+            else if((timeinfo->tm_hour>17||(timeinfo->tm_min==17&&timeinfo->tm_min>=30))&&timeinfo->tm_hour<20)
+                sptFolder += "sunset\\";
+            else
+                sptFolder += "night\\";
+
         }
         CreateDirectory("original resources\\",NULL);
         printf("\nBacking up current sprites...");

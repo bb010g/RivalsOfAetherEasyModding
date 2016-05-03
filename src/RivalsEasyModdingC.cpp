@@ -144,6 +144,7 @@ bool ripSprites(string exe,string folder){
 }
 
 bool replaceSprites(string exe, string folder){
+    bool tooLarge = false;
     vector <int> s1,e1,s2,e2;
     char buffer[3];
     getOffsets(s1,e1,s2,e2);
@@ -153,17 +154,34 @@ bool replaceSprites(string exe, string folder){
         itoa(i+1,buffer,10);
         string temp(buffer);
         temp = folder+"RIP_"+temp+".png";
-        FILE* f = fopen(temp.c_str(),"rb");
-        if(f){
-            fseek(rivalsEXE,start,SEEK_SET);
-            for(int j = 0;j<(end-start);j++){
-                putc(getc(f),rivalsEXE);
+        ifstream myfile (temp.c_str(), ios::binary);
+        streampos begin = myfile.tellg();
+        myfile.seekg (0, ios::end);
+        int size = int(myfile.tellg()-begin);
+        myfile.close();
+        if(size>int(end-start)){
+            if(!tooLarge)
+                printf("\n\n----------- WARNINGS -----------");
+            printf("\n%s is too large",temp.c_str());
+            tooLarge = true;
+        }else{
+            FILE* f = fopen(temp.c_str(),"rb");
+            if(f){
+                fseek(rivalsEXE,start,SEEK_SET);
+                for(int j = 0;j<(end-start);j++){
+                    putc(getc(f),rivalsEXE);
+                }
+                fclose(f);
             }
-            fclose(f);
         }
     }
     fclose(rivalsEXE);
-    printf("\n\n---------------------\nSprite replacement complete");
+    if(tooLarge){
+        printf("\n--------------------------------\nFinished with errors reduce file size on listed files.\n");
+        system("PAUSE");
+    }else{
+        printf("\n\n---------------------\nSprite replacement complete");
+    }
     return true;
 }
 

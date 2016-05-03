@@ -1,4 +1,3 @@
-#Version 1.4 test
 import Tkinter as tk
 import tkMessageBox
 import os
@@ -11,6 +10,8 @@ import tkFileDialog
 import glob
 import shutil
 import ttk
+import urllib2
+import hashlib
 
 def getAppData():
     roamingPath = os.getenv('APPDATA')
@@ -110,14 +111,36 @@ def backup():
     except:
         tkMessageBox.showerror("Backup","Failed to backup files.")
 
+def checksum():
+    c = open("RivalsofAether.exe","rb")
+    exeHash = hashlib.md5(c.read()).hexdigest()
+    c.close()
+    text = 'Rivals EXE MD5: ' + exeHash + '\n'
+    f = []
+    try:
+        for line in urllib2.urlopen('http://jam1-garner.github.io/RivalsOfAetherEasyModding/hashes.txt').readlines():
+            f.append(line[:len(line)-1])
+        hashes = dict(zip(f[0::2], f[1::2]))
+        if exeHash in hashes:
+            text += ('Rivals version: '+hashes[exeHash])
+        else:
+            text += 'Not a registered version, contact jam1garner to register a mod'
+    except:
+        text += 'Could not get hash list.'
+    text += '\n\nCopy MD5 to clipboard?'
+    if tkMessageBox.askyesno("Rivals Checksum", text):
+        r = tk.Tk()
+        r.withdraw()
+        r.clipboard_clear()
+        r.clipboard_append(str(exeHash))
+        r.update()
+        print 'copied '+r.clipboard_get()+' to clipboard'
+        r.destroy()
+
+def register():
+    webbrowser.open('http://goo.gl/forms/GiW7Y8taMx')
+
 #Main Stuff
-e = open("RivalsofAether.exe","r+b")
-x = e.read().find("In Development")
-if x != -1:
-    e.seek(x)
-    e.write("Modded version")
-    print 'Patched title'
-e.close()
         
 path = os.path.realpath(__file__)[:len(os.path.realpath(__file__))-24]
 if not os.path.exists(path+"/sprites/"):
@@ -143,6 +166,8 @@ rivalsmenu = tk.Menu(menubar,tearoff=0)
 rivalsmenu.add_command(label="Run Rivals Without Temporary Patches",command=run)
 rivalsmenu.add_command(label="Run Rivals With Temporary Patches",command=runMod)
 rivalsmenu.add_command(label="Install Mod or Refresh from Backup",command=install)
+rivalsmenu.add_command(label="Checksum/Check Version",command=checksum)
+rivalsmenu.add_command(label="Register Mod",command=register)
 rivalsmenu.add_command(label="Backup Files",command=backup)
 menubar.add_cascade(label="Game",menu=rivalsmenu)
 

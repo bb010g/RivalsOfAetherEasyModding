@@ -231,6 +231,7 @@ bool replaceAudio(string exe, string folder){
 }
 
 int main(int argc, char* argv[]){
+    system("COLOR 0A");
     string command = "", exePath = "RivalsofAether.exe", spritesFolder = "sprites\\", audioFolder = "audio\\", offsetsPath = "offsets.txt";
     if(argc>1)
         command = argv[1];//Set the first argument as the command
@@ -313,4 +314,5 @@ int main(int argc, char* argv[]){
     }
 
     return 0;
+    system("COLOR 0F");
 }
